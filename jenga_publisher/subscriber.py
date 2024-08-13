@@ -90,9 +90,9 @@ class JengaBlockDetector(Node):
                      for j in range(len(corners)):
                          p1 = (int(obb_xyxyxyxy[0][j][0]), int(obb_xyxyxyxy[0][j][1]))
                          p2 = (int(obb_xyxyxyxy[0][(j+1) % 4][0]), int(obb_xyxyxyxy[0][(j+1) % 4][1]))
-                         cv2.line(cv_image, p1, p2, color, 2)  # Use cv_image here
+                         # cv2.line(cv_image, p1, p2, color, 2)  # Use cv_image here
 
-                 self.display_coordinates(coordinates)
+                 # self.display_coordinates(coordinates)
                 
          
              
@@ -101,7 +101,7 @@ class JengaBlockDetector(Node):
                          
 
     def world_coordinates(self, scale_factor, obb_xyxyxyxy):
-        print(f"obb_xyxyxyxy shape: {obb_xyxyxyxy.shape}")
+        # print(f"obb_xyxyxyxy shape: {obb_xyxyxyxy.shape}")
 
         # Convert pixel coordinates to camera coordinates
         def pixel_to_camera(p):
@@ -123,10 +123,10 @@ class JengaBlockDetector(Node):
         P_w_ul = camera_to_world(p_ul)
         P_w_ll = camera_to_world(p_ll)
 
-        print(P_w_lr)
-        print(P_w_ur)
-        print(P_w_ul)
-        print(P_w_ll)
+        # print(P_w_lr)
+        # print(P_w_ur)
+        # print(P_w_ul)
+        # print(P_w_ll)
 
         # Calculate orientation and centroid
         x_bottom = (obb_xyxyxyxy[0][3][0] + obb_xyxyxyxy[0][0][0]) / 2
@@ -143,8 +143,8 @@ class JengaBlockDetector(Node):
         else:
             theta_degrees = 180 - theta_degreesT
 
-        print(theta)
-        print(theta_degrees)
+        # print(theta)
+        # print(theta_degrees)
         
         yll = P_w_ll[1]
         ylr = P_w_lr[1]
@@ -172,8 +172,8 @@ class JengaBlockDetector(Node):
         cent_x = minimx + (l * math.sin(theta))
         cent_y = minim + (l * math.cos(theta))
         
-        print(cent_x)
-        print(cent_y)
+        # print(cent_x)
+        # print(cent_y)
 
         msg = Float32MultiArray()
         msg.data = [cent_x, cent_y, minimz, theta_degrees]
@@ -204,7 +204,7 @@ class JengaBlockDetector(Node):
             for j, corner in enumerate(coord):
                 corner_text = f" {corner_names[j]}: [{corner[0]:.2f}, {corner[1]:.2f}, {corner[2]:.2f}]"
                 cv2.putText(display_image, corner_text, (10, y + (j + 1) * dy), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
-        cv2.imshow('Coordinates', display_image)
+        # cv2.imshow('Coordinates', display_image)
 
     def generate_colors(self, num_colors):
         # Generate random colors for bounding boxes
@@ -227,7 +227,7 @@ class JengaBlockDetector(Node):
                     colors = self.generate_colors(len(obb_boxes))
                     for i, obb in enumerate(obb_boxes):
                         obb_xyxyxyxy = obb.xyxyxyxy.cpu().numpy()
-                        print(f"obb_xyxyxyxy: {obb_xyxyxyxy}")
+                        # print(f"obb_xyxyxyxy: {obb_xyxyxyxy}")
                         scale_factor = self.SF
                         corners = self.world_coordinates(scale_factor, obb_xyxyxyxy)
                         coordinates.append([corner[:3] for corner in corners])
@@ -238,7 +238,7 @@ class JengaBlockDetector(Node):
                             p2 = (int(obb_xyxyxyxy[0][(j+1) % 4][0]), int(obb_xyxyxyxy[0][(j+1) % 4][1]))
                             cv2.line(img, p1, p2, color, 2)
 
-                    self.display_coordinates(coordinates)
+                    # self.display_coordinates(coordinates)
 
                 cv2.imshow('RealSense', img)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
