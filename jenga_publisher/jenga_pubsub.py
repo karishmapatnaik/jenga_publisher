@@ -76,32 +76,30 @@ class JengaBlockDetector(Node):
             else:
                 for obb in obb_boxes:
                     obb_xyxyxyxy = obb.xyxyxyxy.cpu().numpy()
-                    scale_factor = self.SF
-                    xc, yc, zc, thetac = self.world_coordinates(scale_factor, obb_xyxyxyxy)
+                    xc, yc, zc, thetac = self.world_coordinates(self.SF, obb_xyxyxyxy)
                     self.xyztheta = [xc, yc, zc, thetac]
                          
-   
+    def camera_to_world(p):
+        P_wT = np.matmul(self.w_R_c, np.array([p[0], p[1], p[2], 1]))
+        return np.array([P_wT[1], P_wT[0], -P_wT[2], P_wT[3]])
+        
+    def pixel_to_camera(scale_factor, p):
+        P_c = np.matmul(np.linalg.inv(self.camera_matrix), p)
+        return scale_factor * P_c
+        
     def world_coordinates(self, scale_factor, obb_xyxyxyxy):
 
-        def camera_to_world(P_c):
-            P_wT = np.matmul(self.w_R_c, np.array([P_c[0], P_c[1], P_c[2], 1]))
-            return np.array([P_wT[1], P_wT[0], -P_wT[2], P_wT[3]])
-        
-        def pixel_to_camera(scale_factor, p):
-            P_c = np.matmul(np.linalg.inv(self.camera_matrix), p)
-            return scale_factor * P_c
- 
         # Convert pixel coordinates to camera coordinates
-        p_lr = pixel_to_camera(scale_factor, np.array([obb_xyxyxyxy[0][0][0], obb_xyxyxyxy[0][0][1], 1]))
-        p_ur = pixel_to_camera(scale_factor, np.array([obb_xyxyxyxy[0][1][0], obb_xyxyxyxy[0][1][1], 1]))
-        p_ul = pixel_to_camera(scale_factor, np.array([obb_xyxyxyxy[0][2][0], obb_xyxyxyxy[0][2][1], 1]))
-        p_ll = pixel_to_camera(scale_factor, np.array([obb_xyxyxyxy[0][3][0], obb_xyxyxyxy[0][3][1], 1]))
+        p_lr = self.pixel_to_camera(scale_factor, np.array([obb_xyxyxyxy[0][0][0], obb_xyxyxyxy[0][0][1], 1]))
+        p_ur = self.pixel_to_camera(scale_factor, np.array([obb_xyxyxyxy[0][1][0], obb_xyxyxyxy[0][1][1], 1]))
+        p_ul = self.pixel_to_camera(scale_factor, np.array([obb_xyxyxyxy[0][2][0], obb_xyxyxyxy[0][2][1], 1]))
+        p_ll = self.pixel_to_camera(scale_factor, np.array([obb_xyxyxyxy[0][3][0], obb_xyxyxyxy[0][3][1], 1]))
 
         # Convert camera coordinates to world coordinate
-        P_w_lr = camera_to_world(p_lr)
-        P_w_ur = camera_to_world(p_ur)
-        P_w_ul = camera_to_world(p_ul)
-        P_w_ll = camera_to_world(p_ll)
+        P_w_lr = self.camera_to_world(p_lr)
+        P_w_ur = self.camera_to_world(p_ur)
+        P_w_ul = self.camera_to_world(p_ul)
+        P_w_ll = self.camera_to_world(p_ll)
 
         # Calculate orientation and centroid
         x_bottom = (obb_xyxyxyxy[0][3][0] + obb_xyxyxyxy[0][0][0]) / 2
